@@ -1,7 +1,7 @@
 /*
 * Bowling Score Calculator
 *
-* Developed by 
+* Developed by herm1ne
 */
 
 #include <iostream>
