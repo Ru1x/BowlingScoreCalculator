@@ -1,10 +1,7 @@
 /*
 * Bowling Score Calculator
 *
-* Developed by Yuki Dempo
-* Keio University, Facility of Commerce
-* Grade: B1 Student ID: 41514216
-* Part of Assignment of C++
+* Developed by 
 */
 
 #include <iostream>
