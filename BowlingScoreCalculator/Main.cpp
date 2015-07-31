@@ -11,23 +11,23 @@
 
 using namespace std;
 int NewScore(string x); //prototype declaration
-bool IsInteger(const string &str);
+bool IsInteger(const string& str);
 int NofThrow();
 
 //-----Declare G Variables-----
-string score[21] = {}; //# of pins taken down (-1:N/A because of Spare or Strike -2:NotYet 0:Score is zero)
-int CurrentThrow = 1; //CurrentFrame (1 - 21)
-string ScoreFrame[10] = {}; //Score thus far
-//string Message = "";
+string sScore[21] = {}; //# of pins taken down (-1:N/A because of Spare or Strike -2:NotYet 0:Score is zero)
+int iCurrentThrow = 1; //CurrentFrame (1 - 21)
+string sScoreFrame[10] = {}; //Score thus far
+string sMessage = "";
 
 void initialize() {
 	for (int i = 0; i < 21; i++) { //Initialize:(-2) Not yet
-		score[i] = " ";
+		sScore[i] = " ";
 	}
 	for (int i = 0; i < 10; i++) { //Initialize (   ) for blank output
-		ScoreFrame[i] = "   ";
+		sScoreFrame[i] = "   ";
 	}
-	//Message = "Let's start bowling!";
+	sMessage = "Let's start bowling!";
 	return;
 }
 
@@ -35,78 +35,113 @@ void calculate() {
 
 }
 
-void refresh() {
+void refresh() { //Just show the current sScore
 	system("cls"); //Console Clear
 
 	//output
 	cout << "+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+\n";
 	cout << "|  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |   10   |\n";
 	cout << "+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+\n";
-	cout << "| " + score[0] + "| " + score[1] + "| " + score[2] + "| " + score[3] + "| " + score[4] + "| " + score[5] + "| " + score[6] + "| " + score[7] + "| " + score[8] + "| " + score[9] + "| " + score[10] + "| " + score[11] + "| " + score[12] + "| " + score[13] + "| " + score[14] + "| " + score[15] + "| " + score[16] + "| " + score[17] + "| " + score[18] + "| " + score[19] + "| " + score[20] + "|\n";
+	cout << "| " + sScore[0] + "| " + sScore[1] + "| " + sScore[2] + "| " + sScore[3] + "| " + sScore[4] + "| " + sScore[5] + "| " + sScore[6] + "| " + sScore[7] + "| " + sScore[8] + "| " + sScore[9] + "| " + sScore[10] + "| " + sScore[11] + "| " + sScore[12] + "| " + sScore[13] + "| " + sScore[14] + "| " + sScore[15] + "| " + sScore[16] + "| " + sScore[17] + "| " + sScore[18] + "| " + sScore[19] + "| " + sScore[20] + "|\n";
 	cout << "+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+--+--+--+\n";
-	cout << "|  " + ScoreFrame[0] + "|  " + ScoreFrame[1] + "|  " + ScoreFrame[2] + "|  " + ScoreFrame[3] + "|  " + ScoreFrame[4] + "|  " + ScoreFrame[5] + "|  " + ScoreFrame[6] + "|  " + ScoreFrame[7] + "|  " + ScoreFrame[8] + "|     " + ScoreFrame[9] + "|\n";
+	cout << "|  " + sScoreFrame[0] + "|  " + sScoreFrame[1] + "|  " + sScoreFrame[2] + "|  " + sScoreFrame[3] + "|  " + sScoreFrame[4] + "|  " + sScoreFrame[5] + "|  " + sScoreFrame[6] + "|  " + sScoreFrame[7] + "|  " + sScoreFrame[8] + "|     " + sScoreFrame[9] + "|\n";
 	cout << "+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+\n";
+	//cout << sMessage + "\nPlese Enter the Score (Frame" + iCurrentThrow + ")\n";
+
+	sMessage = "";
 	return;
 }
 
 
-
-int main() //Main
+int main() //Main 
 {
-	string xa;
+	string input;
 	initialize();
-	for (int i = 0; i <= 10; i++) {
-		cin >> xa;
-		NewScore(xa);
+
+	for (;iCurrentThrow <= 21; iCurrentThrow++) {
+		for (int iReturnValue;;) {
+			refresh();
+			input = "";
+			iReturnValue = -5;
+			cin >> input;
+			iReturnValue = NewScore(input);
+			if (iReturnValue == 0) {
+				break;
+			}
+			else if (iReturnValue == -1) {
+				sMessage = "Invalid Value. Try again.";
+				continue;
+			}
+			else if (iReturnValue == -2) {
+				sMessage = "Exceed Max Value. Try again.";
+				continue;
+			}
+			else if (iReturnValue == -3) {
+				sMessage = "Strike cannot be in 2nd throw. Try again.";
+				continue;
+			}
+			else if (iReturnValue == -4) {
+				sMessage = "Spare cannot be in 1st throw. Try again.";
+				continue;
+			} else {
+				sMessage = "Enter the score";
+			}
+			refresh();
+		}
+		refresh();
 	}
 
 	return 0;
 }
+
 /*
 @fn
-Convert typed score for output and insert into corresponding score[X]
+Convert typed sScore for output and insert into corresponding sScore[X]
 @param (str) # of pins taken down
-@return error code 0(no error) -1(Invalid Value) -2(Value excessed max score(10)) -999(Unexpected)
+@return error code 0(no error) -1(Invalid Value) -2(Value excessed max sScore(10)) -999(Unexpected)
 */
 int NewScore(string x) {
 	//This chart is so complicated you can find table chart at :
 	//TODO Upload table chart
 	if (IsInteger(x) == true) { //IntegerSection
 		if (stoi(x) == 10) {
-			if (NofThrow() ==1) {
-				score[CurrentThrow - 1] = "X";
+			if (NofThrow() == 1) {
+				sScore[iCurrentThrow - 1] = "X";
 				return 0; //Result 1
-			} else {
-				if(score[CurrentThrow -2] == "G" || score[CurrentThrow - 2] == "F" || score[CurrentThrow - 2] == "-") {
-					score[CurrentThrow - 1] = "/";
+			}
+			else {
+				if (sScore[iCurrentThrow - 2] == "G" || sScore[iCurrentThrow - 2] == "F" || sScore[iCurrentThrow - 2] == "-") {
+					sScore[iCurrentThrow - 1] = "/";
 					return 0; //Result 2
-				} else {
+				}
+				else {
 					return -2; //Result 3
 				}
 			}
 		}
 		else if (stoi(x) == 0) {
-			score[CurrentThrow - 1] = "-";
+			sScore[iCurrentThrow - 1] = "-";
 			return 0; //Result 4
 		}
-		else if (1<=stoi(x) && stoi(x)<=9) {
-			if (NofThrow() == 1){
-			score[CurrentThrow - 1] = x;
-			return 0; //Result 5
-			} else {
-				if (score[CurrentThrow - 2] == "G" || score[CurrentThrow - 2] == "F" || score[CurrentThrow - 2] == "-") {
-					score[CurrentThrow - 1] = x;
+		else if (1 <= stoi(x) && stoi(x) <= 9) {
+			if (NofThrow() == 1) {
+				sScore[iCurrentThrow - 1] = x;
+				return 0; //Result 5
+			}
+			else {
+				if (sScore[iCurrentThrow - 2] == "G" || sScore[iCurrentThrow - 2] == "F" || sScore[iCurrentThrow - 2] == "-") {
+					sScore[iCurrentThrow - 1] = x;
 					return 0; //Result 6
 				}
-				else if(stoi(score[CurrentThrow -2]) + stoi(x) > 10) {
+				else if (iCurrentThrow >= 2 && stoi(sScore[iCurrentThrow - 2]) + stoi(x) > 10) { //TODO Problem/
 					return -2; //Result 7 Exceed Max Score
 				}
-				else if (stoi(score[CurrentThrow - 2]) + stoi(x) == 10) {
-					score[CurrentThrow - 1] = "/";
+				else if (iCurrentThrow >= 2 && stoi(sScore[iCurrentThrow - 2]) + stoi(x) == 10) {
+					sScore[iCurrentThrow - 1] = "/";
 					return 0; //Result 8
 				}
 				else {
-					score[CurrentThrow - 1] = x;
+					sScore[iCurrentThrow - 1] = x;
 					return 0; //Result 9
 				}
 			}
@@ -115,41 +150,43 @@ int NewScore(string x) {
 			return -1; //Result 10
 		}
 	} //Alphabet Section
-	else if (x == "G") {
-		score[CurrentThrow - 1] = "G";
+	else if (x == "G" || x == "g") {
+		sScore[iCurrentThrow - 1] = "G";
 		return 0; //Result 11
 	}
-	else if (x == "F") {
-		score[CurrentThrow - 1] = "F";
+	else if (x == "F" || x == "f") {
+		sScore[iCurrentThrow - 1] = "F";
 		return 0; //Result 12
 	}
-	else if (x == "X") {
+	else if (x == "X" || x == "x") {
 		if (NofThrow() == 1) {
-			score[CurrentThrow - 1] = "X";
+			sScore[iCurrentThrow - 1] = "X";
 			return 0; //Result 13
-		} else {
+		}
+		else {
 			return -3; //Result 14
 		}
 	}
 	else if (x == "/") {
 		if (NofThrow() == 1) {
 			return -4; //Result 15
-		} else {
-			score[CurrentThrow - 1] = "/";
+		}
+		else {
+			sScore[iCurrentThrow - 1] = "/";
 			return 0; //Result 16
 		}
 	}
 	else if (x == "-") {
-		score[CurrentThrow - 1] = "-";
+		sScore[iCurrentThrow - 1] = "-";
 		return 0; //Result 17
 	}
-	else if (x == "S") {
+	else if (x == "S" || x == "s") {
 		if (NofThrow() == 1) {
-			score[CurrentThrow - 1] = "X";
+			sScore[iCurrentThrow - 1] = "X";
 			return 0; //Result 18
 		}
 		else {
-			score[CurrentThrow - 1] = "/";
+			sScore[iCurrentThrow - 1] = "/";
 			return 0; //Result 19
 		}
 	}
@@ -163,8 +200,7 @@ int NewScore(string x) {
 * @param[inout] str ï∂éöóÒ
 * @return êÆêîílÇ»ÇÁtrue
 */
-inline bool IsInteger(const string &str)
-{
+inline bool IsInteger(const string& str) {
 	if (str.find_first_not_of("-0123456789 \t") != string::npos) {
 		return false;
 	}
@@ -180,8 +216,14 @@ Return the # of throw in the frame
 *@return the # of throw
 */
 int NofThrow() {
-	if (CurrentThrow == 20) {return 3;}
-	else if (CurrentThrow % 2 == 0) { return 1; }
-	else if (CurrentThrow % 2 == 1) { return 2; }
+	if (iCurrentThrow == 20) { //3rd throw
+		return 3;
+	}
+	else if (iCurrentThrow % 2 == 0) { //2nd throw
+		return 2;
+	}
+	else if (iCurrentThrow % 2 == 1) { //1st throw
+		return 1;
+	}
 	else return 0; //cant go here
 }
