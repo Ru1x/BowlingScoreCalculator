@@ -27,11 +27,11 @@ void initialize() {
 	for (int i = 0; i < 10; i++) { //Initialize (   ) for blank output
 		sScoreFrame[i] = "   ";
 	}
-	sMessage = "Let's start bowling!";
+	sMessage = "Let's start bowling!"; //Initial Message
 	return;
 }
 
-void calculate() {
+void calculate() { //Future Reserved
 
 }
 
@@ -46,26 +46,28 @@ void refresh() { //Just show the current sScore
 	cout << "+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+--+--+--+\n";
 	cout << "|  " + sScoreFrame[0] + "|  " + sScoreFrame[1] + "|  " + sScoreFrame[2] + "|  " + sScoreFrame[3] + "|  " + sScoreFrame[4] + "|  " + sScoreFrame[5] + "|  " + sScoreFrame[6] + "|  " + sScoreFrame[7] + "|  " + sScoreFrame[8] + "|     " + sScoreFrame[9] + "|\n";
 	cout << "+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+\n";
-	//cout << sMessage + "\nPlese Enter the Score (Frame" + iCurrentThrow + ")\n";
+	cout << sMessage << endl;
+	cout << ">";
 
-	sMessage = "";
+	sMessage = ""; //Reset sMessage for future use
 	return;
 }
 
 
 int main() //Main 
 {
-	string input;
+	string input;  //TODO Let's see if it works when sInput is in main scope
 	initialize();
 
-	for (;iCurrentThrow <= 21; iCurrentThrow++) {
-		for (int iReturnValue;;) {
-			refresh();
+	for (;iCurrentThrow <= 21; iCurrentThrow++) { //This Loop is main loop, it runs until finishes
+		//ACCEPTANCE SECTION HERE
+		for (int iReturnValue;;) { //This loop is for accepting the new score and just show it
+			refresh(); //Initial refresh
 			input = "";
-			iReturnValue = -5;
+			iReturnValue = -5; //TODO implement -5 error deal
 			cin >> input;
 			iReturnValue = NewScore(input);
-			if (iReturnValue == 0) {
+			if (iReturnValue == 0) { //PASS
 				break;
 			}
 			else if (iReturnValue == -1) {
@@ -88,6 +90,8 @@ int main() //Main
 			}
 			refresh();
 		}
+		//CALCULATE SECTION HERE
+		//hogehoge
 		refresh();
 	}
 
@@ -103,7 +107,9 @@ Convert typed sScore for output and insert into corresponding sScore[X]
 int NewScore(string x) {
 	//This chart is so complicated you can find table chart at :
 	//TODO Upload table chart
-	if (IsInteger(x) == true) { //IntegerSection
+
+	//**********Integer Section(input is integer)**********
+	if (IsInteger(x) == true) {
 		if (stoi(x) == 10) {
 			if (NofThrow() == 1) {
 				sScore[iCurrentThrow - 1] = "X";
@@ -149,49 +155,51 @@ int NewScore(string x) {
 		else { //Too Big or Too Small Number Entered!
 			return -1; //Result 10
 		}
-	} //Alphabet Section
-	else if (x == "G" || x == "g") {
+		//**********End of Integer Section**********
+		
+	} //**********Alphabet Section**********
+	else if (x == "G" || x == "g") { //Gutter
 		sScore[iCurrentThrow - 1] = "G";
 		return 0; //Result 11
 	}
-	else if (x == "F" || x == "f") {
+	else if (x == "F" || x == "f") { //Foul
 		sScore[iCurrentThrow - 1] = "F";
 		return 0; //Result 12
 	}
-	else if (x == "X" || x == "x") {
-		if (NofThrow() == 1) {
+	else if (x == "X" || x == "x") { //Strike
+		if (NofThrow() == 1) { //Validate so that Strike cannot be in the 1st throw
 			sScore[iCurrentThrow - 1] = "X";
 			return 0; //Result 13
 		}
 		else {
-			return -3; //Result 14
+			return -3; //Result 14 STRIKE CANNOT BE IN 2ND THROW!
 		}
 	}
-	else if (x == "/") {
-		if (NofThrow() == 1) {
-			return -4; //Result 15
+	else if (x == "/") { //Spare
+		if (NofThrow() == 1) { //Validate so that Spare cannot be in the 2nd throw
+			return -4; //Result 15 SPARE CANNOT BE IN 1ST THROW!
 		}
 		else {
 			sScore[iCurrentThrow - 1] = "/";
 			return 0; //Result 16
 		}
 	}
-	else if (x == "-") {
+	else if (x == "-") { //TODO I am not sure what it is
 		sScore[iCurrentThrow - 1] = "-";
 		return 0; //Result 17
 	}
-	else if (x == "S" || x == "s") {
+	else if (x == "S" || x == "s") { //Strike or Spare. Need to determine by the following statements
 		if (NofThrow() == 1) {
-			sScore[iCurrentThrow - 1] = "X";
+			sScore[iCurrentThrow - 1] = "X"; //oh it's strike, maybe
 			return 0; //Result 18
 		}
 		else {
-			sScore[iCurrentThrow - 1] = "/";
+			sScore[iCurrentThrow - 1] = "/"; //oh it's spare, maybe
 			return 0; //Result 19
 		}
 	}
 	else {
-		return -1; //Result 20
+		return -1; //Result 20 //Other unacceptable value inputted!
 	}
 }
 
