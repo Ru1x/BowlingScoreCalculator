@@ -113,6 +113,33 @@ Convert typed sScore for output and insert into corresponding sScore[X]
 int NewScore(string x) {
 	//This chart is so complicated you can find table chart at :
 	//TODO Upload table chart
+	
+	//**********Special Deal (The 3rd Throw (Only in the 10th frame)**********
+	//This section is intended not to allow excees max value at the point of 3rd throw
+	if (iCurrentThrow == 21) { //when it's the 3rd throw in the 10th frame
+		int i1st, i2nd;
+		if (IsInteger(sScore[iCurrentThrow-3]) == true) { //Put # of pins taken down at the 1st throw into i1st
+			i1st = stoi(sScore[iCurrentThrow - 3]);
+		}
+		else i1st = 0; //When 1st throw is alphabet *see below
+		if (IsInteger(sScore[iCurrentThrow - 2]) == true) { //Put # of pins taken down at the 2nd throw into i2nd
+			i2nd = stoi(sScore[iCurrentThrow - 2]);
+		}
+		else i2nd = 0;
+
+		if (IsInteger(x) == true) {
+			if (stoi(x) + i1st + i2nd == 10) { //Check if all score sum does not exceed 10
+				sScore[iCurrentThrow - 1] = "/";
+				return 0;
+			} else if (stoi(x) + i1st + i2nd > 10) {
+				return -2; //When 2nd throw is alphabet *see below
+			}
+		}
+		//*when 1st and 2nd throw is either X or /, this function will not be called since there is no need to do 3rd throw.
+		//Therefore, when there is a 3rd throw and when it's alphabet, it's surel G, F or - (All worth 0 points)
+		// 1投目と2投目がXか/だった場合、そもそも3投目をする必要がないためこの関数は呼ばれてません。
+		// つまり、3投目が存在して、1投目2投目がアルファベットの場合、そのアルファベットはG、Fあるいは-であることは明白です（すべて0ポイント）
+	}
 
 	//**********Integer Section(input is integer)**********
 	if (IsInteger(x) == true) {
@@ -173,7 +200,7 @@ int NewScore(string x) {
 		return 0; //Result 12
 	}
 	else if (x == "X" || x == "x") { //Strike
-		if (NofThrow() == 1) { //Validate so that Strike cannot be in the 1st throw
+		if (NofThrow() == 1) { //Validate so that Strike only can be in the 1st throw
 			sScore[iCurrentThrow - 1] = "X";
 			return 0; //Result 13
 		}
@@ -182,7 +209,7 @@ int NewScore(string x) {
 		}
 	}
 	else if (x == "/") { //Spare
-		if (NofThrow() == 1) { //Validate so that Spare cannot be in the 2nd throw
+		if (NofThrow() == 1) { //Validate so that Spare only cannot be in the 1st throw
 			return -4; //Result 15 SPARE CANNOT BE IN 1ST THROW!
 		}
 		else {
