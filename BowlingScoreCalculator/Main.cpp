@@ -288,7 +288,7 @@ int NofFrame() {
 	/*
 	Unit Test :PASS (Aug. 01, 2015)
 	*/
-	int iFrame = 0.0;
+	int iFrame;
 	iFrame = floor((iCurrentThrow +1) / 2);
 	return iFrame;
 }
