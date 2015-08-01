@@ -111,6 +111,9 @@ Convert typed sScore for output and insert into corresponding sScore[X]
 @return error code 0(no error) -1(Invalid Value) -2(Value excessed max sScore(10)) -999(Unexpected)
 */
 int NewScore(string x) {
+	/*
+	Unit Test :PASS (Aug. 01, 2015)
+	*/
 	//This chart is so complicated you can find table chart at :
 	//TODO Upload table chart
 	
@@ -257,7 +260,7 @@ Return the # of throw in the frame
 *@return the # of throw
 */
 int NofThrow() {
-	if (iCurrentThrow == 20) { //3rd throw
+	if (iCurrentThrow == 21) { //3rd throw
 		return 3;
 	}
 	else if (iCurrentThrow % 2 == 0) { //2nd throw
