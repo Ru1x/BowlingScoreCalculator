@@ -60,9 +60,15 @@ int main() //Main
 	initialize();
 
 	for (;iCurrentThrow <= 21; iCurrentThrow++) { //This Loop is main loop, it runs until finishes
-		//ACCEPTANCE SECTION HERE
+		//ACCEPTANCE SECTION
 		for (int iReturnValue;;) { //This loop is for accepting the new score and just show it
 			refresh(); //Initial refresh
+			if (iCurrentThrow >= 2 && sScore[iCurrentThrow - 2] == "X") { //if 1st throw is a Strike, skip 2nd throw
+				break;
+			}
+			if (iCurrentThrow == 21 && (sScore[iCurrentThrow-3] =="X" || sScore[iCurrentThrow-2] == "/")) { //On the final frame, if all pis are taken down until the 3rd throw, skip the 3rd throw
+				break;
+			}
 			input = "";
 			iReturnValue = -5; //TODO implement -5 error deal
 			cin >> input;
