@@ -13,10 +13,11 @@ using namespace std;
 int NewScore(string x); //prototype declaration
 bool IsInteger(const string& str);
 int NofThrow();
+int NofFrame();
 
 //-----Declare G Variables-----
 string sScore[21] = {}; //# of pins taken down (-1:N/A because of Spare or Strike -2:NotYet 0:Score is zero)
-int iCurrentThrow = 1; //CurrentFrame (1 - 21)
+int iCurrentThrow = 1; //CurrentThrow (1 - 21)
 string sScoreFrame[10] = {}; //Score thus far
 string sMessage = "";
 
@@ -46,6 +47,8 @@ void refresh() { //Just show the current sScore
 	cout << "+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+--+--+--+\n";
 	cout << "|  " + sScoreFrame[0] + "|  " + sScoreFrame[1] + "|  " + sScoreFrame[2] + "|  " + sScoreFrame[3] + "|  " + sScoreFrame[4] + "|  " + sScoreFrame[5] + "|  " + sScoreFrame[6] + "|  " + sScoreFrame[7] + "|  " + sScoreFrame[8] + "|     " + sScoreFrame[9] + "|\n";
 	cout << "+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+\n";
+	cout << "S:スペア/ストライク　X:ストライク　/：スペア　G:ガーター　F:ファール　-:無得点" << endl;
+	cout << to_string(NofFrame()) + "フレーム目" + to_string(NofThrow()) +"投目のスコアを入力してください。" << endl;
 	cout << sMessage << endl;
 	cout << ">";
 
@@ -260,6 +263,9 @@ Return the # of throw in the frame
 *@return the # of throw
 */
 int NofThrow() {
+	/*
+	Unit Test :PASS (Aug. 01, 2015)
+	*/
 	if (iCurrentThrow == 21) { //3rd throw
 		return 3;
 	}
@@ -270,4 +276,19 @@ int NofThrow() {
 		return 1;
 	}
 	else return 0; //cant go here
+}
+
+/*
+*@fn
+Return the # of Frame
+*@param NONE
+*@return the # of Frame
+*/
+int NofFrame() {
+	/*
+	Unit Test :PASS (Aug. 01, 2015)
+	*/
+	int iFrame = 0.0;
+	iFrame = floor((iCurrentThrow +1) / 2);
+	return iFrame;
 }
