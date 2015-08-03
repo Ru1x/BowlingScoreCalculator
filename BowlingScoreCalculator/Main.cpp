@@ -16,14 +16,17 @@ int NofThrow();
 int NofFrame();
 
 //-----Declare G Variables-----
-string sScore[21] = {}; //# of pins taken down (-1:N/A because of Spare or Strike -2:NotYet 0:Score is zero)
+string sScore[21] = {}; //# of pins taken down (just for output)
+int iPinsTakenDown[21] = {};
 int iCurrentThrow = 1; //CurrentThrow (1 - 21)
 string sScoreFrame[10] = {}; //Score thus far
+string sThisScore[10] = {};
 string sMessage = "";
 
 void initialize() {
 	for (int i = 0; i < 21; i++) { //Initialize:(-2) Not yet
 		sScore[i] = " ";
+		iPinsTakenDown[i] = 0;
 	}
 	for (int i = 0; i < 10; i++) { //Initialize (   ) for blank output
 		sScoreFrame[i] = "   ";
@@ -47,10 +50,15 @@ void refresh() { //Just show the current sScore
 	cout << "+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+--+--+--+\n";
 	cout << "|  " + sScoreFrame[0] + "|  " + sScoreFrame[1] + "|  " + sScoreFrame[2] + "|  " + sScoreFrame[3] + "|  " + sScoreFrame[4] + "|  " + sScoreFrame[5] + "|  " + sScoreFrame[6] + "|  " + sScoreFrame[7] + "|  " + sScoreFrame[8] + "|     " + sScoreFrame[9] + "|\n";
 	cout << "+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+\n";
-	cout << "S:スペア/ストライク　X:ストライク　/：スペア　G:ガーター　F:ファール　-:無得点" << endl;
 	cout << to_string(NofFrame()) + "フレーム目" + to_string(NofThrow()) +"投目のスコアを入力してください。" << endl;
+	cout << "倒したピンの本数を入力する代わりに、以下の記号を直接入力することもできます。" << endl;
+	cout << "S:スペア/ストライク　X:ストライク　/：スペア　G:ガーター　F:ファール　-:無得点" << endl;
 	cout << sMessage << endl;
-	cout << ">";
+	//For Debugging
+	for (int i = 0; i < 21; i++) {cout << to_string(iPinsTakenDown[i]) + ",";}
+	cout << endl;
+
+	cout << "Score>>";
 
 	sMessage = ""; //Reset sMessage for future use
 	return;
@@ -63,19 +71,25 @@ int main() //Main
 	initialize();
 
 	for (;iCurrentThrow <= 21; iCurrentThrow++) { //This Loop is main loop, it runs until finishes
+
+		if (iCurrentThrow ==21 && (sScore[18] != "X" && sScore[19] != "/")) { //3rd throw on the final frame is ONLY allowd when you get strike or spare in the prior frame
+			iPinsTakenDown[20] = 0;
+			sScore[20] = "-";
+			break;
+		}
 		//ACCEPTANCE SECTION
 		for (int iReturnValue;;) { //This loop is for accepting the new score and just show it
 			refresh(); //Initial refresh
-			if (iCurrentThrow >= 2 && sScore[iCurrentThrow - 2] == "X") { //if 1st throw is a Strike, skip 2nd throw
+			if (iCurrentThrow >= 2 && sScore[iCurrentThrow - 2] == "X" && NofFrame() != 10) { //if 1st throw is a Strike, skip 2nd throw WHEN it is NOT in the final frame
 				break;
 			}
-			if (iCurrentThrow == 21 && (sScore[iCurrentThrow-3] =="X" || sScore[iCurrentThrow-2] == "/")) { //On the final frame, if all pis are taken down until the 3rd throw, skip the 3rd throw
-				break;
-			}
+			//if (iCurrentThrow == 21 && (sScore[iCurrentThrow-3] =="X" || sScore[iCurrentThrow-2] == "/")) { //On the final frame, if all pis are taken down until the 3rd throw, skip the 3rd throw
+				//break;
+			//} //According to the gamerule, you can throw more even if you got a strike or spare (specially applicable on the final frame)
 			input = "";
 			iReturnValue = -5; //TODO implement -5 error deal
 			cin >> input;
-			iReturnValue = NewScore(input);
+			iReturnValue = NewScore(input); //Validate
 			if (iReturnValue == 0) { //PASS
 				break;
 			}
@@ -120,43 +134,20 @@ int NewScore(string x) {
 	//This chart is so complicated you can find table chart at :
 	//TODO Upload table chart
 	
-	//**********Special Deal (The 3rd Throw (Only in the 10th frame)**********
-	//This section is intended not to allow excees max value at the point of 3rd throw
-	if (iCurrentThrow == 21) { //when it's the 3rd throw in the 10th frame
-		int i1st, i2nd;
-		if (IsInteger(sScore[iCurrentThrow-3]) == true) { //Put # of pins taken down at the 1st throw into i1st
-			i1st = stoi(sScore[iCurrentThrow - 3]);
-		}
-		else i1st = 0; //When 1st throw is alphabet *see below
-		if (IsInteger(sScore[iCurrentThrow - 2]) == true) { //Put # of pins taken down at the 2nd throw into i2nd
-			i2nd = stoi(sScore[iCurrentThrow - 2]);
-		}
-		else i2nd = 0;
 
-		if (IsInteger(x) == true) {
-			if (stoi(x) + i1st + i2nd == 10) { //Check if all score sum does not exceed 10
-				sScore[iCurrentThrow - 1] = "/";
-				return 0;
-			} else if (stoi(x) + i1st + i2nd > 10) {
-				return -2; //When 2nd throw is alphabet *see below
-			}
-		}
-		//*when 1st and 2nd throw is either X or /, this function will not be called since there is no need to do 3rd throw.
-		//Therefore, when there is a 3rd throw and when it's alphabet, it's surel G, F or - (All worth 0 points)
-		// 1投目と2投目がXか/だった場合、そもそも3投目をする必要がないためこの関数は呼ばれてません。
-		// つまり、3投目が存在して、1投目2投目がアルファベットの場合、そのアルファベットはG、Fあるいは-であることは明白です（すべて0ポイント）
-	}
-
+//This section has been removed (gamerule misunderstood, no need to enforce special deal)	
 	//**********Integer Section(input is integer)**********
 	if (IsInteger(x) == true) {
 		if (stoi(x) == 10) {
-			if (NofThrow() == 1) {
+			if (NofThrow() == 1 || NofThrow() == 3) {
 				sScore[iCurrentThrow - 1] = "X";
+				iPinsTakenDown[iCurrentThrow - 1] = 10;
 				return 0; //Result 1
 			}
 			else {
 				if (sScore[iCurrentThrow - 2] == "G" || sScore[iCurrentThrow - 2] == "F" || sScore[iCurrentThrow - 2] == "-") {
 					sScore[iCurrentThrow - 1] = "/";
+					iPinsTakenDown[iCurrentThrow - 1] = 10;
 					return 0; //Result 2
 				}
 				else {
@@ -171,22 +162,46 @@ int NewScore(string x) {
 		else if (1 <= stoi(x) && stoi(x) <= 9) {
 			if (NofThrow() == 1) {
 				sScore[iCurrentThrow - 1] = x;
+				iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
 				return 0; //Result 5
+			}
+			else if (NofThrow() == 3) { //3rd throw special treatment
+				if (sScore[iCurrentThrow - 3] == "X" || sScore[iCurrentThrow - 2] == "/") {
+					sScore[iCurrentThrow - 1] = x;
+					iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
+					return 0;
+				}
+				if (iPinsTakenDown[iCurrentThrow -3] + iPinsTakenDown[iCurrentThrow - 2] >= 10) { //Considering 1st and 2nd are strike or one of them is strike (then you dont need to check the max)
+					sScore[iCurrentThrow - 1] = x;
+					iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
+					return 0;
+				} else {
+					if (iPinsTakenDown[iCurrentThrow -3] + iPinsTakenDown[iCurrentThrow -2] + stoi(x) > 10) { //Check if excess max score
+						return -2; //Exceeded
+					} else {
+						sScore[iCurrentThrow - 1] = x;
+						iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
+						return 0;
+					}
+				}
 			}
 			else {
 				if (sScore[iCurrentThrow - 2] == "G" || sScore[iCurrentThrow - 2] == "F" || sScore[iCurrentThrow - 2] == "-") {
 					sScore[iCurrentThrow - 1] = x;
+					iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
 					return 0; //Result 6
 				}
-				else if (iCurrentThrow >= 2 && stoi(sScore[iCurrentThrow - 2]) + stoi(x) > 10) { //TODO Problem/
+				else if (iCurrentThrow >= 2 && iPinsTakenDown[iCurrentThrow - 2] + stoi(x) > 10) { //TODO Problem/
 					return -2; //Result 7 Exceed Max Score
 				}
-				else if (iCurrentThrow >= 2 && stoi(sScore[iCurrentThrow - 2]) + stoi(x) == 10) {
+				else if (iCurrentThrow >= 2 && iPinsTakenDown[iCurrentThrow - 2] + stoi(x) == 10) {
 					sScore[iCurrentThrow - 1] = "/";
+					iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
 					return 0; //Result 8
 				}
 				else {
 					sScore[iCurrentThrow - 1] = x;
+					iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
 					return 0; //Result 9
 				}
 			}
@@ -199,15 +214,18 @@ int NewScore(string x) {
 	} //**********Alphabet Section**********
 	else if (x == "G" || x == "g") { //Gutter
 		sScore[iCurrentThrow - 1] = "G";
+		iPinsTakenDown[iCurrentThrow - 1] = 0;
 		return 0; //Result 11
 	}
 	else if (x == "F" || x == "f") { //Foul
 		sScore[iCurrentThrow - 1] = "F";
+		iPinsTakenDown[iCurrentThrow - 1] = 0;
 		return 0; //Result 12
 	}
 	else if (x == "X" || x == "x") { //Strike
 		if (NofThrow() == 1) { //Validate so that Strike only can be in the 1st throw
 			sScore[iCurrentThrow - 1] = "X";
+			iPinsTakenDown[iCurrentThrow - 1] = 10;
 			return 0; //Result 13
 		}
 		else {
@@ -220,20 +238,24 @@ int NewScore(string x) {
 		}
 		else {
 			sScore[iCurrentThrow - 1] = "/";
+			iPinsTakenDown[iCurrentThrow - 1] = 10 - iPinsTakenDown[iCurrentThrow - 2];
 			return 0; //Result 16
 		}
 	}
 	else if (x == "-") { //TODO I am not sure what it is
 		sScore[iCurrentThrow - 1] = "-";
+		iPinsTakenDown[iCurrentThrow - 1] = 0;
 		return 0; //Result 17
 	}
 	else if (x == "S" || x == "s") { //Strike or Spare. Need to determine by the following statements
 		if (NofThrow() == 1) {
 			sScore[iCurrentThrow - 1] = "X"; //oh it's strike, maybe
+			iPinsTakenDown[iCurrentThrow - 1] = 10;
 			return 0; //Result 18
 		}
 		else {
 			sScore[iCurrentThrow - 1] = "/"; //oh it's spare, maybe
+			iPinsTakenDown[iCurrentThrow - 1] = 10 - iPinsTakenDown[iCurrentThrow - 2];
 			return 0; //Result 19
 		}
 	}
