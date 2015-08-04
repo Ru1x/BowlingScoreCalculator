@@ -25,7 +25,7 @@ string sScoreFrame[10] = {}; //Score thus far
 int iThisScore[10] = {};
 string sMessage = "";
 
-void initialize() {
+void initialize() {//初期化用
 	for (int i = 0; i < 21; i++) { //Initialize:(-2) Not yet
 		sScore[i] = " ";
 		iPinsTakenDown[i] = 0;
@@ -38,8 +38,8 @@ void initialize() {
 	return;
 }
 
-void calculate() { //Future Reserved
-	for (int i = 0; i < 10; i++) { //TODO i<9にして10だけ特別処理を書く
+void calculate() { //Calculate Total Score 合計得点を計算
+	for (int i = 0; i < 10; i++) { 
 		bool IsCalculable;
 		if (sScoreFrame[i] != "   ") { //already calculated, no need to re-calculated -> skip
 			continue;
@@ -51,7 +51,7 @@ void calculate() { //Future Reserved
 		if (i == 9) { //Final Frame / Special Treatment
 			if (sScore[20] != " ") {
 				IsCalculable = true;
-				iThisScore[9] = iPinsTakenDown[18] + iPinsTakenDown[19] + iPinsTakenDown[20];
+				iThisScore[9] = iPinsTakenDown[18] + iPinsTakenDown[19] + iPinsTakenDown[20]; //Add up the scores of final 3 throws
 			} else {
 				continue;
 			}
@@ -93,7 +93,7 @@ void calculate() { //Future Reserved
 			}
 		}
 		else {
-			continue;
+			continue; //Uncalculable
 		}
 
 		if (IsCalculable == true) {
@@ -107,7 +107,7 @@ void calculate() { //Future Reserved
 	return;
 }
 
-void refresh() { //Just show the current sScore
+void refresh() { //Just show the current score
 	system("cls"); //Console Clear
 
 	//output
@@ -118,7 +118,7 @@ void refresh() { //Just show the current sScore
 	cout << "+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+--+--+--+\n";
 	cout << "|  " + sScoreFrame[0] + "|  " + sScoreFrame[1] + "|  " + sScoreFrame[2] + "|  " + sScoreFrame[3] + "|  " + sScoreFrame[4] + "|  " + sScoreFrame[5] + "|  " + sScoreFrame[6] + "|  " + sScoreFrame[7] + "|  " + sScoreFrame[8] + "|     " + sScoreFrame[9] + "|\n";
 	cout << "+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+\n";
-	if (iCurrentThrow < 22) { //if iCurrentThrow == 22, it means game is over, just call refresh() for output final score
+	if (iCurrentThrow < 22) { //if iCurrentThrow == 22, it means game is over, just call refresh() for output final score ゲーム終了後はこのcoutを行わない（スコア表示のみ行う）
 		cout << to_string(NofFrame()) + "フレーム目" + to_string(NofThrow()) + "投目のスコアを入力してください。" << endl;
 		cout << "倒したピンの本数を入力する代わりに、以下の記号を直接入力することもできます。" << endl;
 		cout << "S:スペア/ストライク　X:ストライク　/：スペア　G:ガーター　F:ファール　-:無得点" << endl;
@@ -138,7 +138,7 @@ void refresh() { //Just show the current sScore
 
 int main() //Main 
 {
-	string input; //TODO Let's see if it works when sInput is in main scope
+	string input; 
 	initialize();
 
 	for (; iCurrentThrow <= 21; iCurrentThrow++) { //This Loop is main loop, it runs until finishes
@@ -146,6 +146,8 @@ int main() //Main
 		if (iCurrentThrow == 21 && (sScore[18] != "X" && sScore[19] != "/")) { //3rd throw on the final frame is ONLY allowd when you get strike or spare in the prior frame
 			iPinsTakenDown[20] = 0;
 			sScore[20] = "-";
+			calculate();
+			iCurrentThrow++;
 			break;
 		}
 		//ACCEPTANCE SECTION
@@ -189,7 +191,7 @@ int main() //Main
 		sMessage = "あなたのスコアは" + sScoreFrame[9] + "点です。\n";
 		if (sScoreFrame[9] == "300") { sMessage += "パーフェクトゲーム達成です。おめでとうございます。"; }
 		refresh();
-		cout << "Press Enter key to exit...";
+		cout << "Type something and press Enter key to exit...";
 		cin >> input;
 	return 0;
 	
@@ -205,6 +207,7 @@ int NewScore(string x) {
 	/*
 	Unit Test :PASS (Aug. 01, 2015)
 	*/
+	if (x == "") { return -5; }
 	//**********Integer Section(input is integer)**********
 	if (IsInteger(x) == true) {
 		if (stoi(x) == 10) {
@@ -262,7 +265,7 @@ int NewScore(string x) {
 					iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
 					return 0; //Result 6
 				}
-				else if (iCurrentThrow >= 2 && iPinsTakenDown[iCurrentThrow - 2] + stoi(x) > 10) {
+				else if (NofFrame() <10 && iCurrentThrow >= 2 && iPinsTakenDown[iCurrentThrow - 2] + stoi(x) > 10) {
 					return -2; //Result 7 Exceed Max Score
 				}
 				else if (iCurrentThrow >= 2 && iPinsTakenDown[iCurrentThrow - 2] + stoi(x) == 10) {
@@ -313,7 +316,7 @@ int NewScore(string x) {
 			return 0; //Result 16
 		}
 	}
-	else if (x == "-") { //TODO I am not sure what it is
+	else if (x == "-") { 
 		sScore[iCurrentThrow - 1] = "-";
 		iPinsTakenDown[iCurrentThrow - 1] = 0;
 		return 0; //Result 17
