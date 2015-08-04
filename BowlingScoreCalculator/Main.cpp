@@ -26,6 +26,7 @@ int iThisScore[10] = {};
 string sMessage = "";
 
 void initialize() {//初期化用
+	iCurrentThrow = 1;
 	for (int i = 0; i < 21; i++) { //Initialize:(-2) Not yet
 		sScore[i] = " ";
 		iPinsTakenDown[i] = 0;
@@ -138,6 +139,7 @@ void refresh() { //Just show the current score
 
 int main() //Main 
 {
+	start:
 	string input; 
 	initialize();
 
@@ -191,9 +193,12 @@ int main() //Main
 		sMessage = "あなたのスコアは" + sScoreFrame[9] + "点です。\n";
 		if (sScoreFrame[9] == "300") { sMessage += "パーフェクトゲーム達成です。おめでとうございます。"; }
 		refresh();
-		cout << "Type something and press Enter key to exit...";
+		cout << "Type exit and press Enter key to exit...(typing something else will continue...)";
 		cin >> input;
-		getchar();
+		if (input !="exit") {
+			goto start;
+		}
+		
 	return 0;
 	
 }
