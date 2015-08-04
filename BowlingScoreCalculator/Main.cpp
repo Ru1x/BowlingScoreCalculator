@@ -211,7 +211,7 @@ int NewScore(string x) {
 	//**********Integer Section(input is integer)**********
 	if (IsInteger(x) == true) {
 		if (stoi(x) == 10) {
-			if (NofThrow() == 1 || NofThrow() == 3) {
+			if (NofThrow() == 1 || NofThrow() == 3 || iCurrentThrow == 20) {
 				sScore[iCurrentThrow - 1] = "X";
 				iPinsTakenDown[iCurrentThrow - 1] = 10;
 				return 0; //Result 1
