@@ -39,51 +39,72 @@ void initialize() {
 }
 
 void calculate() { //Future Reserved
-	for (int i = 0; i < 10;i++) {  //TODO i<9にして10だけ特別処理を書く
+	for (int i = 0; i < 10; i++) { //TODO i<9にして10だけ特別処理を書く
 		bool IsCalculable;
-		if (sScoreFrame[i] != "   ") { continue; }
-		if (i > NofFrame() - 1) { continue; }
+		if (sScoreFrame[i] != "   ") { //already calculated, no need to re-calculated -> skip
+			continue;
+		}
+		if (i > NofFrame() - 1) { //The frame is not thrown yet -> skip
+			continue;
+		}
+
+		if (i == 9) { //Final Frame / Special Treatment
+			if (sScore[20] != " ") {
+				IsCalculable = true;
+				iThisScore[9] = iPinsTakenDown[18] + iPinsTakenDown[19] + iPinsTakenDown[20];
+			} else {
+				continue;
+			}
+		}
 
 		//Check if Strike or Spare or just finished
-		if (sScore[i*2] == "X") { //Strike
-			if (sScore[(i+1)*2] != " " && (sScore[(i+1)*2+1] != " " || sScore[(i+2)*2] != " ")) { //If Check calculable on strike
+		else if (sScore[i * 2] == "X") { //Strike
+			if (sScore[(i + 1) * 2] != " " && (sScore[(i + 1) * 2 + 1] != " " || sScore[(i + 2) * 2] != " ")) { //If Check calculable on strike
 				iThisScore[i] = iPinsTakenDown[i * 2] + iPinsTakenDown[(i + 1) * 2]; //Basic Score and Bonus Score#1
 				IsCalculable = true;
 
 				if (sScore[(i + 1) * 2 + 1] == " ") { //Select Bonus Score #2 based on availability 次の投球が1投先か2投先か確認
 					iThisScore[i] += iPinsTakenDown[(i + 2) * 2]; //Multiple Strike
-				} else {
+				}
+				else {
 					iThisScore[i] += iPinsTakenDown[(i + 1) * 2 + 1]; //Strike 途中で切れた
 				}
 			}
-			else { continue; } //Uncalculable because there is no enough score progression, wait for next throw is done
+			else {
+				continue;
+			} //Uncalculable because there is no enough score progression, wait for next throw is done
 		}
-		else if (sScore[i*2+1] == "/") { //Spare
-			if (sScore[(i+1)*2] != " ") { //Check if calculable on Spare
+		else if (sScore[i * 2 + 1] == "/") { //Spare
+			if (sScore[(i + 1) * 2] != " ") { //Check if calculable on Spare
 				iThisScore[i] += iPinsTakenDown[i * 2] + iPinsTakenDown[i * 2 + 1] + iPinsTakenDown[(i + 1) * 2];
 				IsCalculable = true;
 			}
-			else { continue; } //Uncalculable because no enough score progression, wait for next throw is done
-		}
-		else if (i == NofFrame() -1 && NofThrow() == 2) { //Just Finished
-			if (iPinsTakenDown[i*2] + iPinsTakenDown[i*2+1] ==10) { //Spare or Strike -> Skip, wait for next throw
+			else {
 				continue;
-			} else {
+			} //Uncalculable because no enough score progression, wait for next throw is done
+		}
+		else if (i == NofFrame() - 1 && NofThrow() == 2) { //Just Finished
+			if (iPinsTakenDown[i * 2] + iPinsTakenDown[i * 2 + 1] == 10) { //Spare or Strike -> Skip, wait for next throw
+				continue;
+			}
+			else {
 				IsCalculable = true;
 				iThisScore[i] += iPinsTakenDown[i * 2] + iPinsTakenDown[i * 2 + 1];
 			}
-		} else {
+		}
+		else {
 			continue;
 		}
 
 		if (IsCalculable == true) {
 			int iBuffer = 0;
-			for (int j = 0; j <= i;j++) {
+			for (int j = 0; j <= i; j++) {
 				iBuffer += iThisScore[j];
 			}
 			sScoreFrame[i] = padding(3, iBuffer);
 		}
 	}
+	return;
 }
 
 void refresh() { //Just show the current sScore
@@ -97,15 +118,18 @@ void refresh() { //Just show the current sScore
 	cout << "+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+  +--+--+--+--+\n";
 	cout << "|  " + sScoreFrame[0] + "|  " + sScoreFrame[1] + "|  " + sScoreFrame[2] + "|  " + sScoreFrame[3] + "|  " + sScoreFrame[4] + "|  " + sScoreFrame[5] + "|  " + sScoreFrame[6] + "|  " + sScoreFrame[7] + "|  " + sScoreFrame[8] + "|     " + sScoreFrame[9] + "|\n";
 	cout << "+-----+-----+-----+-----+-----+-----+-----+-----+-----+--------+\n";
-	cout << to_string(NofFrame()) + "フレーム目" + to_string(NofThrow()) +"投目のスコアを入力してください。" << endl;
-	cout << "倒したピンの本数を入力する代わりに、以下の記号を直接入力することもできます。" << endl;
-	cout << "S:スペア/ストライク　X:ストライク　/：スペア　G:ガーター　F:ファール　-:無得点" << endl;
+	if (iCurrentThrow < 22) { //if iCurrentThrow == 22, it means game is over, just call refresh() for output final score
+		cout << to_string(NofFrame()) + "フレーム目" + to_string(NofThrow()) + "投目のスコアを入力してください。" << endl;
+		cout << "倒したピンの本数を入力する代わりに、以下の記号を直接入力することもできます。" << endl;
+		cout << "S:スペア/ストライク　X:ストライク　/：スペア　G:ガーター　F:ファール　-:無得点" << endl;
+	}
 	cout << sMessage << endl;
 	//For Debugging
-	for (int i = 0; i < 21; i++) {cout << to_string(iPinsTakenDown[i]) + ",";}
+/*	for (int i = 0; i < 21; i++) {
+		cout << to_string(iPinsTakenDown[i]) + ",";
+	}*/
 	cout << endl;
-
-	cout << "Score>>";
+	if (iCurrentThrow < 22) { cout << "Score>>"; }
 
 	sMessage = ""; //Reset sMessage for future use
 	return;
@@ -114,12 +138,12 @@ void refresh() { //Just show the current sScore
 
 int main() //Main 
 {
-	string input;  //TODO Let's see if it works when sInput is in main scope
+	string input; //TODO Let's see if it works when sInput is in main scope
 	initialize();
 
-	for (;iCurrentThrow <= 21; iCurrentThrow++) { //This Loop is main loop, it runs until finishes
+	for (; iCurrentThrow <= 21; iCurrentThrow++) { //This Loop is main loop, it runs until finishes
 
-		if (iCurrentThrow ==21 && (sScore[18] != "X" && sScore[19] != "/")) { //3rd throw on the final frame is ONLY allowd when you get strike or spare in the prior frame
+		if (iCurrentThrow == 21 && (sScore[18] != "X" && sScore[19] != "/")) { //3rd throw on the final frame is ONLY allowd when you get strike or spare in the prior frame
 			iPinsTakenDown[20] = 0;
 			sScore[20] = "-";
 			break;
@@ -130,9 +154,6 @@ int main() //Main
 			if (iCurrentThrow >= 2 && sScore[iCurrentThrow - 2] == "X" && NofFrame() != 10) { //if 1st throw is a Strike, skip 2nd throw WHEN it is NOT in the final frame
 				break;
 			}
-			//if (iCurrentThrow == 21 && (sScore[iCurrentThrow-3] =="X" || sScore[iCurrentThrow-2] == "/")) { //On the final frame, if all pis are taken down until the 3rd throw, skip the 3rd throw
-				//break;
-			//} //According to the gamerule, you can throw more even if you got a strike or spare (specially applicable on the final frame)
 			input = "";
 			iReturnValue = -5; //TODO implement -5 error deal
 			cin >> input;
@@ -155,16 +176,23 @@ int main() //Main
 			else if (iReturnValue == -4) {
 				sMessage = "Spare cannot be in 1st throw. Try again.";
 				continue;
-			} else {
+			}
+			else {
 				sMessage = "Enter the score";
 			}
 			refresh();
 		}
-		//CALCULATE SECTION HERE
+		//CALCULATE SECTION
 		calculate();
 		refresh();
 	}
+		sMessage = "あなたのスコアは" + sScoreFrame[9] + "点です。\n";
+		if (sScoreFrame[9] == "300") { sMessage += "パーフェクトゲーム達成です。おめでとうございます。"; }
+		refresh();
+		cout << "Press Enter key to exit...";
+		cin >> input;
 	return 0;
+	
 }
 
 /*
@@ -212,14 +240,16 @@ int NewScore(string x) {
 					iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
 					return 0;
 				}
-				if (iPinsTakenDown[iCurrentThrow -3] + iPinsTakenDown[iCurrentThrow - 2] >= 10) { //Considering 1st and 2nd are strike or one of them is strike (then you dont need to check the max)
+				if (iPinsTakenDown[iCurrentThrow - 3] + iPinsTakenDown[iCurrentThrow - 2] >= 10) { //Considering 1st and 2nd are strike or one of them is strike (then you dont need to check the max)
 					sScore[iCurrentThrow - 1] = x;
 					iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
 					return 0;
-				} else {
-					if (iPinsTakenDown[iCurrentThrow -3] + iPinsTakenDown[iCurrentThrow -2] + stoi(x) > 10) { //Check if excess max score
+				}
+				else {
+					if (iPinsTakenDown[iCurrentThrow - 3] + iPinsTakenDown[iCurrentThrow - 2] + stoi(x) > 10) { //Check if excess max score
 						return -2; //Exceeded
-					} else {
+					}
+					else {
 						sScore[iCurrentThrow - 1] = x;
 						iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
 						return 0;
@@ -251,7 +281,7 @@ int NewScore(string x) {
 			return -1; //Result 10
 		}
 		//**********End of Integer Section**********
-		
+
 	} //**********Alphabet Section**********
 	else if (x == "G" || x == "g") { //Gutter
 		sScore[iCurrentThrow - 1] = "G";
@@ -264,7 +294,7 @@ int NewScore(string x) {
 		return 0; //Result 12
 	}
 	else if (x == "X" || x == "x") { //Strike
-		if (NofThrow() == 1 || NofThrow() == 3) { //Validate so that Strike only can be in the 1st throw
+		if (NofThrow() == 1 || NofThrow() == 3 || (NofThrow() == 2 && NofFrame() == 10)) { //Validate so that Strike only can be in the 1st throw && <Strike can be in the second throw of the FINAL Frame>
 			sScore[iCurrentThrow - 1] = "X";
 			iPinsTakenDown[iCurrentThrow - 1] = 10;
 			return 0; //Result 13
@@ -352,7 +382,10 @@ int NofFrame() {
 	Unit Test :PASS (Aug. 01, 2015)
 	*/
 	int iFrame;
-	iFrame = floor((iCurrentThrow +1) / 2);
+	iFrame = floor((iCurrentThrow + 1) / 2);
+	if (iCurrentThrow == 21) {
+		return 10;
+	}
 	return iFrame;
 }
 
@@ -360,7 +393,7 @@ string padding(int length, int content) {
 
 	string sContent = to_string(content);
 	stringstream output;
-	for (int i = 0; i< length - sContent.length(); i++) {
+	for (int i = 0; i < length - sContent.length(); i++) {
 		output << " ";
 	}
 
