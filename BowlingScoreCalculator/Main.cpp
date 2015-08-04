@@ -8,19 +8,21 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
+#include <sstream>
 
 using namespace std;
 int NewScore(string x); //prototype declaration
 bool IsInteger(const string& str);
 int NofThrow();
 int NofFrame();
+string padding(int length, int content);
 
 //-----Declare G Variables-----
 string sScore[21] = {}; //# of pins taken down (just for output)
 int iPinsTakenDown[21] = {};
 int iCurrentThrow = 1; //CurrentThrow (1 - 21)
 string sScoreFrame[10] = {}; //Score thus far
-string sThisScore[10] = {};
+int iThisScore[10] = {};
 string sMessage = "";
 
 void initialize() {
@@ -30,13 +32,58 @@ void initialize() {
 	}
 	for (int i = 0; i < 10; i++) { //Initialize (   ) for blank output
 		sScoreFrame[i] = "   ";
+		iThisScore[i] = 0;
 	}
 	sMessage = "Let's start bowling!"; //Initial Message
 	return;
 }
 
 void calculate() { //Future Reserved
+	for (int i = 0; i < 10;i++) {  //TODO i<9Ç…ÇµÇƒ10ÇæÇØì¡ï èàóùÇèëÇ≠
+		bool IsCalculable;
+		if (sScoreFrame[i] != "   ") { continue; }
+		if (i > NofFrame() - 1) { continue; }
 
+		//Check if Strike or Spare or just finished
+		if (sScore[i*2] == "X") { //Strike
+			if (sScore[(i+1)*2] != " " && (sScore[(i+1)*2+1] != " " || sScore[(i+2)*2] != " ")) { //If Check calculable on strike
+				iThisScore[i] = iPinsTakenDown[i * 2] + iPinsTakenDown[(i + 1) * 2]; //Basic Score and Bonus Score#1
+				IsCalculable = true;
+
+				if (sScore[(i + 1) * 2 + 1] == " ") { //Select Bonus Score #2 based on availability éüÇÃìäãÖÇ™1ìäêÊÇ©2ìäêÊÇ©ämîF
+					iThisScore[i] += iPinsTakenDown[(i + 2) * 2]; //Multiple Strike
+				} else {
+					iThisScore[i] += iPinsTakenDown[(i + 1) * 2 + 1]; //Strike ìríÜÇ≈êÿÇÍÇΩ
+				}
+			}
+			else { continue; } //Uncalculable because there is no enough score progression, wait for next throw is done
+		}
+		else if (sScore[i*2+1] == "/") { //Spare
+			if (sScore[(i+1)*2] != " ") { //Check if calculable on Spare
+				iThisScore[i] += iPinsTakenDown[i * 2] + iPinsTakenDown[i * 2 + 1] + iPinsTakenDown[(i + 1) * 2];
+				IsCalculable = true;
+			}
+			else { continue; } //Uncalculable because no enough score progression, wait for next throw is done
+		}
+		else if (i == NofFrame() -1 && NofThrow() == 2) { //Just Finished
+			if (iPinsTakenDown[i*2] + iPinsTakenDown[i*2+1] ==10) { //Spare or Strike -> Skip, wait for next throw
+				continue;
+			} else {
+				IsCalculable = true;
+				iThisScore[i] += iPinsTakenDown[i * 2] + iPinsTakenDown[i * 2 + 1];
+			}
+		} else {
+			continue;
+		}
+
+		if (IsCalculable == true) {
+			int iBuffer = 0;
+			for (int j = 0; j <= i;j++) {
+				iBuffer += iThisScore[j];
+			}
+			sScoreFrame[i] = padding(3, iBuffer);
+		}
+	}
 }
 
 void refresh() { //Just show the current sScore
@@ -114,10 +161,9 @@ int main() //Main
 			refresh();
 		}
 		//CALCULATE SECTION HERE
-		//hogehoge
+		calculate();
 		refresh();
 	}
-
 	return 0;
 }
 
@@ -131,11 +177,6 @@ int NewScore(string x) {
 	/*
 	Unit Test :PASS (Aug. 01, 2015)
 	*/
-	//This chart is so complicated you can find table chart at :
-	//TODO Upload table chart
-	
-
-//This section has been removed (gamerule misunderstood, no need to enforce special deal)	
 	//**********Integer Section(input is integer)**********
 	if (IsInteger(x) == true) {
 		if (stoi(x) == 10) {
@@ -191,7 +232,7 @@ int NewScore(string x) {
 					iPinsTakenDown[iCurrentThrow - 1] = stoi(x);
 					return 0; //Result 6
 				}
-				else if (iCurrentThrow >= 2 && iPinsTakenDown[iCurrentThrow - 2] + stoi(x) > 10) { //TODO Problem/
+				else if (iCurrentThrow >= 2 && iPinsTakenDown[iCurrentThrow - 2] + stoi(x) > 10) {
 					return -2; //Result 7 Exceed Max Score
 				}
 				else if (iCurrentThrow >= 2 && iPinsTakenDown[iCurrentThrow - 2] + stoi(x) == 10) {
@@ -223,7 +264,7 @@ int NewScore(string x) {
 		return 0; //Result 12
 	}
 	else if (x == "X" || x == "x") { //Strike
-		if (NofThrow() == 1) { //Validate so that Strike only can be in the 1st throw
+		if (NofThrow() == 1 || NofThrow() == 3) { //Validate so that Strike only can be in the 1st throw
 			sScore[iCurrentThrow - 1] = "X";
 			iPinsTakenDown[iCurrentThrow - 1] = 10;
 			return 0; //Result 13
@@ -233,7 +274,7 @@ int NewScore(string x) {
 		}
 	}
 	else if (x == "/") { //Spare
-		if (NofThrow() == 1) { //Validate so that Spare only cannot be in the 1st throw
+		if (NofThrow() == 1 || NofThrow() == 3) { //Validate so that Spare only cannot be in the 1st throw
 			return -4; //Result 15 SPARE CANNOT BE IN 1ST THROW!
 		}
 		else {
@@ -270,7 +311,7 @@ int NewScore(string x) {
 * @return êÆêîílÇ»ÇÁtrue
 */
 inline bool IsInteger(const string& str) {
-	if (str.find_first_not_of("-0123456789 \t") != string::npos) {
+	if (str.find_first_not_of("0123456789 \t") != string::npos) {
 		return false;
 	}
 
@@ -313,4 +354,17 @@ int NofFrame() {
 	int iFrame;
 	iFrame = floor((iCurrentThrow +1) / 2);
 	return iFrame;
+}
+
+string padding(int length, int content) {
+
+	string sContent = to_string(content);
+	stringstream output;
+	for (int i = 0; i< length - sContent.length(); i++) {
+		output << " ";
+	}
+
+	output << sContent;
+
+	return output.str();
 }
