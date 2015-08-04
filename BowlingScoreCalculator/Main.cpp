@@ -193,6 +193,7 @@ int main() //Main
 		refresh();
 		cout << "Type something and press Enter key to exit...";
 		cin >> input;
+		getchar();
 	return 0;
 	
 }
